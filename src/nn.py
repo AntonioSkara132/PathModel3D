@@ -49,13 +49,13 @@ class PathModel3D(nn.Module):
 
         def forward(self, shape, shape_mask, tgt_len):
                 B = shape.shape[0]
-                emb_tgt = torch.zeros([B, tgt_len, self.d_model])
+                emb_tgt = torch.zeros([B, tgt_len, self.d_model], device = shape.device)
 
                 emb_tgt = emb_tgt + self.positional_encoding[:tgt_len].permute(1, 0, 2)
                 
-                emb_shape = self.shape_encoder(shape).permute(0, 2, 1)      
+                emb_shape = self.shape_encoder(shape)
 
-                tgt_mask = torch.triu(torch.ones(tgt_len, tgt_len, device=tgt.device) * float('-inf'), diagonal=1).bool()
+                tgt_mask = torch.triu(torch.ones(tgt_len, tgt_len, device=shape.device) * float('-inf'), diagonal=1).bool()
 
                 out = self.decoder(emb_tgt, memory=emb_shape, tgt_mask=tgt_mask, memory_key_padding_mask = shape_mask)
                 out = self.output_layer(out)
