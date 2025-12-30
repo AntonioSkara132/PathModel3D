@@ -1,0 +1,25 @@
+import numpy as np
+from scipy.spatial.transform import Rotation as R
+import os
+
+NUM_ROTATE = 100
+
+names = os.listdir("blender_primitives_np")
+directory = "blender_primitives_np/"
+
+for name in names:
+    data = np.load(directory + name)   # (512, 3)
+    augmented = []                     # list of (512, 3)
+
+    for i in range(NUM_ROTATE):
+        roll = np.random.uniform(0, 1)
+        pitch = np.random.uniform(0, 1)
+        yaw = np.random.uniform(0, 1)
+
+        rotation = rotation = R.random()
+        aug_data = rotation.apply(data)   # (512, 3)
+
+        augmented.append(aug_data)
+
+    new_data = np.stack(augmented, axis=0)  # (N, 512, 3)
+    np.save("augmented_" + name, new_data)

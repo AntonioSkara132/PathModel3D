@@ -1,0 +1,8 @@
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+
+data = np.load("augmented_cone.npy")
+
+ax.scatter(data[0, :], data[1, :], data[2, :])
+
+plt.show()

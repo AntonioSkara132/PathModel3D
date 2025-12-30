@@ -1,0 +1,19 @@
+import os
+from torch.utils.data import Dataset
+import numpy as np
+from augmentation import rotate
+
+class ShapeDataset(Dataset):
+    def __init__(self, directory, num_augment):
+        self.num_augment = num_augment
+        filenames = os.listdir(directory)
+        self.names = [name.removesuffix() for name in filenames]
+
+    def __len__(self):
+        return len(self.filenames)
+        
+    def __getitem__(self, idx):
+        file_idx = idx % self.num_
+        data = np.load(os.join(directory, self.filenames[idx]))
+        return rotate(data)
+            

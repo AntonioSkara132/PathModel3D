@@ -1,0 +1,95 @@
+import torch
+import torch.nn as nn
+from transformers import BertModel
+from torch.nn.utils.rnn import pad_sequence
+import sys
+sys.path.append('/content/LangPathModel/src/')
+from ShapeEcoders import ShapeEncoder
+
+"""LangPathModel
+This file contains definition of basic LangPathModel
+"""
+
+
+class PathModel3D(nn.Module):
+	def __init__(self, 
+		 d_traj = 4, 
+		 d_model=512, 
+		 num_heads_encoder=8,
+		 num_heads_decoder=8,
+		 num_decoder_layers=5,
+		 num_encoder_layers=1,
+		 hidden_dim=512, 
+		 dropout = 0, 
+		 max_length=1000):
+		super(LangPathModel, self).__init__()
+
+		self.d_model = d_model
+                self.d_traj = d_traj
+		self.num_encoders = num_encoder_layers
+		self.num_decoders = num_decoder_layers
+
+		# Embedding layer for input and output
+		self.input_embedding = nn.Linear(d_traj, d_model)
+
+		# Positional encoding to add positional information
+		self.positional_encoding = self.get_positional_encoding(max_length, d_model)
+		self.shape_encoder =  ShapeEncoder(d_model)
+
+		decoderLayer = torch.nn.TransformerDecoderLayer(
+		    d_model=d_model,
+		    nhead=num_heads_decoder,
+		    dim_feedforward=hidden_dim,
+		    drows/LangPath3D/src/pout=dropout,
+		    batch_first = True
+		)
+		self.decoder = torch.nn.TransformerDecoder(decoder_layer=decoderLayer, num_layers=5)
+		self.output_layer = nn.Linear(d_model, d_traj)
+
+	def forward(self, shape, shape_mask, tgt_len):
+                B = shape.shape(0)
+		emb_tgt = torch.zeros([B, T, self.d_traj])
+
+		emb_tgt = emb_tgt + self.positional_encoding[:tgt_len].permute(1, 0, 2)
+		
+		emb_shape = self.shape_encoder(shape, ~shape_mask)      
+
+		tgt_mask = torch.triu(torch.ones(tgt_len, tgt_len, device=tgt.device) * float('-inf'), diagonal=1).bool()
+
+		out = self.decoder(emb_tgt, memory=emb_text, tgt_mask=tgt_mask, tgt_key_padding_mask = path_mask[:, :-1], memory_key_padding_mask = shape_mask)
+                out = self.output_layer(out)
+                self.update_occupancy(out)
+		return out
+
+        def update_occupancy(self, point):
+                diffs = self.shape - point
+                distances = torch.linalg.norm(diffs)
+                probs = -torch.tanh(x) + 1
+                inverse_probs = 1-probs
+                lk = torch.log(self.occupancy) + torch.log(torch.divide(probs, 1-probs)
+                self.occupancy = torch.sigmoid(-lk)
+                
+	def get_positional_encoding(self, max_length, d_model):
+		position = torch.arange(0, max_length).unsqueeze(1).float()
+		div_term = torch.exp(torch.arange(0, d_model, 2).float() * -(torch.log(torch.tensor(10000.0)) / d_model))
+		pe = torch.zeros(max_length, 1, d_model)
+		pe[:, 0, 0::2] = torch.sin(position * div_term)
+		pe[:, 0, 1::2] = torch.cos(position * div_term)
+		return pe
+
+	def get_loss(
+		self,
+		predictions: torch.Tensor,      # [B, T, d_traj]
+		targets:     torch.Tensor,      # [B, T, d_traj]
+		mask:        torch.Tensor,      # [B, T]  (1 = keep, 0 = pad)
+		length_penalty: torch.Tensor | None = None,  # e.g. abs(pred_len - tgt_len)
+		lambda_penalty: float = 0.1,
+		loss_type: str = "mse",
+	):
+                return self.occupancy.mean()
+                
+
+
+
+
+
