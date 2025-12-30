@@ -4,8 +4,9 @@ import os
 import torch
 
 NUM_ROTATE = 100
-def rotate(data, num_rotate):
+def rotate(data):
     rotation = R.random().as_matrix()
-    rotation = torch.from_numpy(rotation)
-    aug_data = torch.einsum("ab, bcij->acij", rotation, data)
+    print(rotation.dtype)
+    print(data.dtype)
+    aug_data = data @ rotation.T
     return aug_data

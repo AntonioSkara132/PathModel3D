@@ -1,0 +1,6 @@
+from data import ShapeDataset as Dataset
+
+dataset = Dataset("/home/antonio/ws/LangPath3D/data/blender_primitives_np", 32)
+
+print(dataset[0])
+
