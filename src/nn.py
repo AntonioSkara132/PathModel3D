@@ -4,7 +4,7 @@ from transformers import BertModel
 from torch.nn.utils.rnn import pad_sequence
 import sys
 sys.path.append('/content/LangPathModel/src/')
-from PointNet import PointNet as ShapeEncoder
+from src.pointnet import PointNet as ShapeEncoder
 
 """LangPathModel
 This file contains definition of basic LangPathModel

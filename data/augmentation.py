@@ -6,7 +6,5 @@ import torch
 NUM_ROTATE = 100
 def rotate(data):
     rotation = R.random().as_matrix()
-    print(rotation.dtype)
-    print(data.dtype)
     aug_data = data @ rotation.T
     return aug_data

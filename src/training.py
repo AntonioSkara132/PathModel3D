@@ -1,11 +1,11 @@
 import argparse
 import torch
 from torch.utils.data import DataLoader
-from nn import PathModel3D
+from src.nn import PathModel3D
 import sys
 sys.path.append("/content/LangPathModel")
 from data.data_utils import ShapeDataset, collate_fn
-from train import train
+from src.train import train
 
 """
 If you want to train your LangPath model you call this function.
@@ -44,11 +44,11 @@ def get_args():
 def main():
 	args = get_args()
 
-	dataset = PathDataset(args.dataset_path)
+	dataset = ShapeDataset(args.dataset_path, 100)
 	dataloader = DataLoader(dataset, batch_size=args.batch_size, collate_fn=collate_fn, shuffle=True)
 
 	# Instantiate model with cmd‑line hyper‑parameters
-	model = LangPathModel(
+	model = PathModel3D(
 	d_model=args.d_model,
 	num_heads_decoder=args.num_heads,
 	num_decoder_layers=args.num_decoder_layers,
