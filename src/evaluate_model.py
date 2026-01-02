@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
+from src.nn import PathModel3D
 
 """
 Generate a robotic drawing trajectory from a trained model
@@ -15,8 +16,6 @@ def load_model(model_path: str, device: torch.device):
 	- PyTorch checkpoint with config dict (`torch.save({'model_state_dict': ..., 'config': ...})`)
 	Returns a model moved to the target device.
 	"""
-	
-	from nn import LangPathModel  # update path if needed
 
 	# Standard torch.save(dict) format
 	checkpoint = torch.load(model_path, map_location=device)
@@ -26,7 +25,7 @@ def load_model(model_path: str, device: torch.device):
 		"num_decoder_layers": 5,
 		"dropout": 0.2
 	})
-	model = LangPathModel(
+	model = PathModel3D(
 		d_model=config["d_model"],
 		num_heads_decoder=config["num_heads"],
 		num_decoder_layers=config["num_decoder_layers"],

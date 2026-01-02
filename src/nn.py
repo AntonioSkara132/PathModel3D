@@ -13,7 +13,7 @@ This file contains definition of basic LangPathModel
 
 class PathModel3D(nn.Module):
         def __init__(self, 
-		 d_traj = 4, 
+		 d_traj = 3, 
 		 d_model=512, 
 		 num_heads_encoder=8,
 		 num_heads_decoder=8,
@@ -34,7 +34,7 @@ class PathModel3D(nn.Module):
                 self.shape_encoder =  self.shape_encoder = ShapeEncoder(
                         emb_dims=d_model,
                         input_shape="bnc",
-                        global_feat=False
+                        global_feat=True
                 )
 
                 decoderLayer = torch.nn.TransformerDecoderLayer(
@@ -49,26 +49,31 @@ class PathModel3D(nn.Module):
 
         def forward(self, shape, shape_mask, tgt_len):
                 B = shape.shape[0]
+                #print(f"B: {B}")
                 emb_tgt = torch.zeros([B, tgt_len, self.d_model], device = shape.device)
+                #print(f"emb_tgt dims: {emb_tgt.shape}")
+                #print(f"shape dims: {shape.shape}")     
 
                 emb_tgt = emb_tgt + self.positional_encoding[:tgt_len].permute(1, 0, 2)
                 
-                emb_shape = self.shape_encoder(shape)
+                emb_shape = self.shape_encoder(shape).permute(0, 2, 1)
+                #print(f"emb_shape dims: {emb_shape.shape}")
 
                 tgt_mask = torch.triu(torch.ones(tgt_len, tgt_len, device=shape.device) * float('-inf'), diagonal=1).bool()
 
                 out = self.decoder(emb_tgt, memory=emb_shape, tgt_mask=tgt_mask, memory_key_padding_mask = shape_mask)
                 out = self.output_layer(out)
+                #print(f"out dims: {out.shape}")
                 occupancy = self.update_occupancy(out, shape)
                 return out, occupancy
 
-        def update_occupancy(self, vels, shape, sigma=0.05):
+        def update_occupancy(self, vels, shape, sigma=0.1):
                 """
                 path: [B, T, 3]
                 shape: [B, N, 3]
                 """
                 # squared distances
-                path = torch.cumsum(vels, dim = -1)
+                path = torch.cumsum(vels, dim = 1)
                 diffs = (shape[:, None, :, :] - path[:, :, None, :]) ** 2  # [B, T, N, 3]
                 d2 = diffs.sum(-1)  # [B, T, N]
                 
@@ -76,8 +81,8 @@ class PathModel3D(nn.Module):
                 contribs = torch.exp(-d2 / sigma**2)  # [B, T, N]
                 
                 # cumulative occupancy (stepwise)
-                occupancy_steps = torch.tanh(torch.sum(contribs, dim=1)) # or tanh or clamp
-                return occupancy_steps
+                occupancy = torch.clamp(torch.sum(contribs, dim=1), 0, 1) # or tanh or clamp
+                return occupancy
                 
         def get_positional_encoding(self, max_length, d_model):
                 position = torch.arange(0, max_length).unsqueeze(1).float()
@@ -87,8 +92,8 @@ class PathModel3D(nn.Module):
                 pe[:, 0, 1::2] = torch.cos(position * div_term)
                 return pe
 
-        def loss(self, occupancy_steps):
-                return occupancy.mean()
+        def get_loss(self, occupancy):
+                return -torch.log(occupancy.mean())
 
 
 

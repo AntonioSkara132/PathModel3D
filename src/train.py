@@ -46,13 +46,16 @@ def train(
             # text to device + masks
             shape   = shape.to(device).to(torch.float32)
             shape_mask  = shape_mask.to(device)  # True where padding !!!
+            #print(shape.item())
+            #print(shape_mask[0, :])
 
             # forward/backward
             optimizer.zero_grad(set_to_none=True)
 
-            preds = model(shape, shape_mask, 20)  
+            preds, occupancy = model(shape, shape_mask, 20)  
+            #print(preds[0, :, :])
 
-            loss = model.get_loss(shape)
+            loss = model.get_loss(occupancy)
 
             loss.backward()
             optimizer.step()
