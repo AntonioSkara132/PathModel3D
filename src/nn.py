@@ -47,7 +47,7 @@ class PathModel3D(nn.Module):
                 self.decoder = torch.nn.TransformerDecoder(decoder_layer=decoderLayer, num_layers=5)
                 self.output_layer = nn.Linear(d_model, d_traj)
 
-        def forward(self, shape, shape_mask, tgt_len):
+        def forward(self, start_pt, shape, shape_mask, tgt_len):
                 B = shape.shape[0]
                 #print(f"B: {B}")
                 emb_tgt = torch.zeros([B, tgt_len, self.d_model], device = shape.device)
@@ -64,16 +64,22 @@ class PathModel3D(nn.Module):
                 out = self.decoder(emb_tgt, memory=emb_shape, tgt_mask=tgt_mask, memory_key_padding_mask = shape_mask)
                 out = self.output_layer(out)
                 #print(f"out dims: {out.shape}")
-                occupancy = self.update_occupancy(out, shape)
+                occupancy = self.update_occupancy(start_pt, out, shape)
                 return out, occupancy
 
-        def update_occupancy(self, vels, shape, sigma=0.1):
+        def update_occupancy(self, start_pt, vels, shape, sigma=0.1):
                 """
                 path: [B, T, 3]
                 shape: [B, N, 3]
                 """
+                assert len(start_pt.shape) == 3
+                assert len(vels.shape) == 3
+                assert len(shape.shape) == 3
+
+                #print(f"start pt: {start_pt.shape}")
+
                 # squared distances
-                path = torch.cumsum(vels, dim = 1)
+                path = start_pt + torch.cumsum(vels, dim = 1)
                 diffs = (shape[:, None, :, :] - path[:, :, None, :]) ** 2  # [B, T, N, 3]
                 d2 = diffs.sum(-1)  # [B, T, N]
                 
