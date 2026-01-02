@@ -29,6 +29,8 @@ class PathModel3D(nn.Module):
 
                 # Positional encoding to add positional information
                 pe = self.get_positional_encoding(max_length, d_model)
+
+                self.start_layer = nn.Linear(d_traj, d_model)
                 self.register_buffer("positional_encoding", pe)
                 
                 self.shape_encoder =  self.shape_encoder = ShapeEncoder(
@@ -51,10 +53,12 @@ class PathModel3D(nn.Module):
                 B = shape.shape[0]
                 #print(f"B: {B}")
                 emb_tgt = torch.zeros([B, tgt_len, self.d_model], device = shape.device)
+                emb_start = self.start_layer(start_pt).unsqueeze(1)  # [B, 1, d_model]
                 #print(f"emb_tgt dims: {emb_tgt.shape}")
                 #print(f"shape dims: {shape.shape}")     
 
                 emb_tgt = emb_tgt + self.positional_encoding[:tgt_len].permute(1, 0, 2)
+                emb_tgt = emb_tgt + emb_start
                 
                 emb_shape = self.shape_encoder(shape).permute(0, 2, 1)
                 #print(f"emb_shape dims: {emb_shape.shape}")
