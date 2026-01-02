@@ -3,6 +3,7 @@ from datetime import datetime
 import torch
 from torch.optim.lr_scheduler import StepLR
 from data.augmentation import rotate
+import random
 
 """ train of LangPathModel """
 
@@ -36,6 +37,9 @@ def train(
     scheduler  = StepLR(optimizer, step_size=step, gamma=gamma)
 
     num_batches = len(dataloader)
+    batch_size = dataloader.batch_size
+
+    T = 20
 
     for epoch in range(1, niter + 1):
         epoch_start = time.time()
@@ -44,6 +48,7 @@ def train(
         for shape, shape_mask in dataloader:
 
             # text to device + masks
+            shape_size = shape.shape[1]
             shape   = shape.to(device).to(torch.float32)
             shape_mask  = shape_mask.to(device)  # True where padding !!!
             #print(shape.item())
@@ -51,10 +56,13 @@ def train(
 
             # forward/backward
             optimizer.zero_grad(set_to_none=True)
-
-            preds, occupancy = model(shape, shape_mask, 20)  
+            random.randint(0, batch_size-1)
+            start_idx = torch.randint(0, shape_size - 1, [1])
+            start_pt = shape[:, start_idx, :]
+            
+            preds, occupancy = model(start_pt, shape, shape_mask, T)  
             #print(preds[0, :, :])
-
+  
             loss = model.get_loss(occupancy)
 
             loss.backward()

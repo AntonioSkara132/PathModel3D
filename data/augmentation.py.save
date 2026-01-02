@@ -1,0 +1,12 @@
+import numpy as np
+from scipy.spatial.transform import Rotation as R
+import os
+import torch
+
+NUM_ROTATE = 100
+def rotate(data):
+    rotation = R.random().as_matrix()
+    aug_data = data @ rotation.T
+    return aug_data
+
+
