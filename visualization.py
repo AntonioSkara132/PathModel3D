@@ -64,7 +64,7 @@ shape_mask = torch.zeros([1, 512])
 shape = shape.unsqueeze(0)
 
 model = load_model("model1.pth", torch.device('cpu'))
-tgt_len = 20
+tgt_len = 100
 print(shape.shape)
 print(shape_mask.shape)
 

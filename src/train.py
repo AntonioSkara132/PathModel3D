@@ -17,7 +17,7 @@ def train(
         gamma: float = 0.1,
         weight_decay: float = 0.0,
         checkpoint: str | None = None,
-        ckpt_every: int = 10,
+        ckpt_every: int = 1000,
         ckpt_dir: str = "/checkpoints/"
 ):
     """Train `model` for `niter` epochs and time each epoch."""
@@ -39,7 +39,7 @@ def train(
     num_batches = len(dataloader)
     batch_size = dataloader.batch_size
 
-    T = 20
+    T = 50
 
     for epoch in range(1, niter + 1):
         epoch_start = time.time()
