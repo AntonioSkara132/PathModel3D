@@ -1,0 +1,6 @@
+* Next
+
+*** TODO Add starting points
+*** TODO Add penalizing velocities norm
+
+
