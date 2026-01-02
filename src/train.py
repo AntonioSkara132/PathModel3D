@@ -78,6 +78,7 @@ def train(
         print(f"[{datetime.now().strftime('%H:%M:%S')}] "
               f"Epoch {epoch:03d}/{niter} | "
               f"Loss: {avg_loss:8.4f} | "
+              f"Occupancy: {occupancy.mean().item():6.4f} | "
               f"Time: {epoch_time:6.2f}s")
 
         # checkpointing
