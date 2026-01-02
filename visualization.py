@@ -5,13 +5,13 @@ from src.evaluate_model import load_model
 import numpy as np
 from torch import nn
 
-def visualize_path_3d(out, shape, batch_idx=0, steps=None):
+def visualize_path_3d(start_pt, out, shape, batch_idx=0, steps=None):
     """
     out:   [B, T, 3]  (velocities)
     shape: [B, N, 3]  (point cloud)
     """
     out = out.detach().cpu()
-    out = torch.cumsum(out, 1)
+    out = torch.cumsum(out, 1) + start_pt
     shape_b = shape.detach().cpu()
 
     if steps is not None:
@@ -63,13 +63,18 @@ shape = torch.from_numpy(shape)
 shape_mask = torch.zeros([1, 512])
 shape = shape.unsqueeze(0)
 
-model = load_model("occupancy_mode1.pth", torch.device('cpu'))
+model = load_model("model1.pth", torch.device('cpu'))
 tgt_len = 20
 print(shape.shape)
 print(shape_mask.shape)
 
-out, occupancy = model(shape, shape_mask, tgt_len)
+start_pt = shape[0, 0, :]
+start_pt = start_pt.unsqueeze(0).unsqueeze(0)
+print(start_pt)
+
+out, occupancy = model(start_pt, shape, shape_mask, tgt_len)
 print(out)
-visualize_path_3d(out, shape, batch_idx=0, steps=100)
+out = out
+visualize_path_3d(start_pt, out, shape, batch_idx=0, steps=100)
 
 

@@ -53,7 +53,7 @@ class PathModel3D(nn.Module):
                 B = shape.shape[0]
                 #print(f"B: {B}")
                 emb_tgt = torch.zeros([B, tgt_len, self.d_model], device = shape.device)
-                emb_start = self.start_layer(start_pt).unsqueeze(1)  # [B, 1, d_model]
+                emb_start = self.start_layer(start_pt)  # [B, 1, d_model]
                 #print(f"emb_tgt dims: {emb_tgt.shape}")
                 #print(f"shape dims: {shape.shape}")     
 
