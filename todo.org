@@ -1,6 +1,13 @@
 * Next
 
-*** TODO Add starting points
-*** TODO Add penalizing velocities norm
+** Fixes
+1. [ ] Add starting points
+2. [ ] Add penalizing velocities norm
+ 
+** Training
+1. [ ] Loop over multiple configuration
+
+
+
 
 
